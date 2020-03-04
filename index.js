@@ -1,6 +1,9 @@
 const dotenv = require('dotenv');
 dotenv.config()
 const Telegraf = require('telegraf');
+const { google } = require('googleapis');
+const sampleClient = require('./oauthclient');
+
 const videoIdRegex = /(?:youtube\.com\/watch\?v=|youtu.be\/)(.*)/;
 const { REFRESH_TOKEN, BOT_TOKEN, PLAYLIST_ID } = process.env;
 
@@ -34,3 +37,10 @@ const initBot = () => {
   })
   bot.launch();
 }
+
+(async () => {
+    youtube = google.youtube({
+      version: 'v3',
+      auth: await sampleClient({ refresh_token: REFRESH_TOKEN, scopes: ['https://www.googleapis.com/auth/youtube'] }),
+    })
+})().then(initBot);
