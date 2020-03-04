@@ -30,6 +30,9 @@
     "telegraf": "^3.36.0",
     "url": "^0.11.0"
   },
+  "engines": {
+    "node": "13.x"
+  },
   "babel": {
     "presets": [
       "@babel/env"
