@@ -4,7 +4,8 @@
   "description": "Generate youtube playlist from telegram",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon --exec babel-node index.js"
   },
   "keywords": [
     "telegram",
@@ -15,6 +16,9 @@
   "license": "Beerware",
   "dependencies": {
     "dotenv": "^8.2.0",
-    "telegraf": "^3.36.0"
+  "babel": {
+    "presets": [
+      "@babel/env"
+    ]
   }
 }
