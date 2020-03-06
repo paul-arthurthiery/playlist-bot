@@ -1,18 +1,22 @@
-const dotenv = require('dotenv');
-dotenv.config()
+require('dotenv').config({ path: process.env.NODE === 'production' ? './.env' : './.env.test' })
 const Telegraf = require('telegraf');
 const { google } = require('googleapis');
 const sampleClient = require('./oauthclient');
 
-const videoIdRegex = /(?:youtube\.com\/watch\?v=|youtu.be\/)(.*)/;
-const { REFRESH_TOKEN, BOT_TOKEN, PLAYLIST_ID } = process.env;
+const youtubeUrlRegex = /(?:youtube\.com\/watch\?v=|youtu\.be\/)(\S*)/
+const getVideoId = (text) => {
+  const youtubeUrlSection = text.match(youtubeUrlRegex)[0];
+  const url = new URL(`https://${youtubeUrlSection}`);
+  return url.searchParams.get('v') || url.pathname.slice(1);
+}
+const { REFRESH_TOKEN, BOT_TOKEN, PLAYLIST_ID, REDIRECT_URI, CLIENT_ID, CLIENT_SECRET } = process.env;
 
 const bot = new Telegraf(BOT_TOKEN)
 // initialize the Youtube API library
 let youtube;
 
 
-const addVideoToPlaylist = async (url) => {
+const addVideoToPlaylist = async (videoId) => {
   const insertPayload = {
     part: 'snippet',
     resource: {
@@ -21,7 +25,7 @@ const addVideoToPlaylist = async (url) => {
         position: 0,
         resourceId: {
           kind: 'youtube#video',
-          videoId: url.match(videoIdRegex)[1]
+          videoId,
         }
       }
     }
@@ -31,9 +35,10 @@ const addVideoToPlaylist = async (url) => {
 
 const initBot = () => {
   bot.start((ctx) => ctx.reply('No, you start'))
-  bot.hears(videoIdRegex, async (ctx) => {
-    await addVideoToPlaylist(ctx.message.text);
-    return ctx.reply(`Added video to youtube playlist: https://www.youtube.com/playlist?list=${PLAYLIST_ID}`);
+  bot.hears(getVideoId, async (ctx) => {
+    const videoId = getVideoId(ctx.message.text);
+    await addVideoToPlaylist(videoId);
+    return ctx.reply(`Added video https://www.youtube.com/watch?v=${videoId} to youtube playlist: https://www.youtube.com/playlist?list=${PLAYLIST_ID}`);
   })
   bot.launch();
 }
@@ -41,6 +46,6 @@ const initBot = () => {
 (async () => {
     youtube = google.youtube({
       version: 'v3',
-      auth: await sampleClient({ refresh_token: REFRESH_TOKEN, scopes: ['https://www.googleapis.com/auth/youtube'] }),
+      auth: await sampleClient({ refreshToken: REFRESH_TOKEN, scopes: ['https://www.googleapis.com/auth/youtube'], redirectUri: REDIRECT_URI, clientId: CLIENT_ID, clientSecret: CLIENT_SECRET }),
     })
 })().then(initBot);
