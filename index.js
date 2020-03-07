@@ -2,6 +2,13 @@ require('dotenv').config({ path: process.env.NODE_ENV === 'production' ? './.env
 const Telegraf = require('telegraf');
 const { google } = require('googleapis');
 const sampleClient = require('./oauthclient');
+const express = require('express');
+
+
+const app = express();
+app.get('/', (req, res) => res.send('Hello World!'));
+
+const port = process.env.PORT || 3000;
 
 const youtubeUrlRegex = /(?:youtube\.com\/watch\?v=|youtu\.be\/)(\S*)/
 const getVideoId = (text) => {
@@ -40,6 +47,7 @@ const initBot = () => {
     await addVideoToPlaylist(videoId);
     return ctx.reply(`Added video https://www.youtube.com/watch?v=${videoId} to youtube playlist: https://www.youtube.com/playlist?list=${PLAYLIST_ID}`);
   })
+  app.listen(port, () => console.log(`Bot running on port ${port}!`));
   bot.launch();
 }
 
