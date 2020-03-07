@@ -1,5 +1,5 @@
 const { google } = require('googleapis');
-const protocol = process.env.NODE === 'production' ? require('https') : require('http')
+const protocol = process.env.NODE_ENV === 'production' ? require('https') : require('http')
 const opn = require('open');
 const destroyer = require('server-destroy');
 const util = require('util');

@@ -1,4 +1,4 @@
-require('dotenv').config({ path: process.env.NODE === 'production' ? './.env' : './.env.test' })
+require('dotenv').config({ path: process.env.NODE_ENV === 'production' ? './.env' : './.env.test' });
 const Telegraf = require('telegraf');
 const { google } = require('googleapis');
 const sampleClient = require('./oauthclient');
