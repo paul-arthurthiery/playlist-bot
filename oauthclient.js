@@ -17,12 +17,16 @@ const sampleClient = async ({ refreshToken, scopes, redirectUri, clientId, clien
       clientSecret,
       redirectUri
     );
+
+    if(!refreshToken && process.env.NODE_ENV === 'production'){
+      throw new Error('running in production requires a refresh token');
+    }
     
     if(!refreshToken){
       if(!scopes){throw new Error('scopes are need on first run')}
       const generatedRefreshToken = await loadRefreshToken(oAuth2Client, scopes, redirectUri);
       throw new Error(`Add this to your .env: 
-      REFRESH_TOKEN=${util.inspect(generatedRefreshToken.refresh_token)}`)
+      REFRESH_TOKEN=${util.inspect(generatedRefreshToken.refresh_token)}`);
     }
 
     oAuth2Client.setCredentials({
