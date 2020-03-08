@@ -41,12 +41,17 @@ const addVideoToPlaylist = async (videoId) => {
 }
 
 const initBot = () => {
-  bot.start((ctx) => ctx.reply('No, you start'))
-  bot.hears(getVideoId, async (ctx) => {
-    const videoId = getVideoId(ctx.message.text);
+  const botResponseVideo = async (ctx, isGroup) => {
+    const videoId = getVideoId(ctx.message?.text);
     await addVideoToPlaylist(videoId);
-    return ctx.reply(`Added video https://www.youtube.com/watch?v=${videoId} to youtube playlist: https://www.youtube.com/playlist?list=${PLAYLIST_ID}`);
-  })
+    return ctx.reply(`${isGroup ? `@${ctx.message.from.username} ` : ''}Added video https://www.youtube.com/watch?v=${videoId} to youtube playlist: https://www.youtube.com/playlist?list=${PLAYLIST_ID}`);
+  };
+  bot.start((ctx) => ctx.reply('No, you start'));
+  bot.command('content', (ctx) => botResponseVideo(ctx, true));
+  bot.hears(getVideoId, (ctx) => botResponseVideo(ctx, false));
+  bot.telegram.getMe().then((botInfo) => {
+    bot.options.username = botInfo.username;
+  });
   app.listen(port, () => console.log(`Bot running on port ${port}!`));
   bot.launch();
 }
